@@ -1,0 +1,3 @@
+add_subdirectory(FileWatcher)
+
+set(THIRDPARTY_FILEWATCHER_LIBS FileWatcher PARENT_SCOPE)

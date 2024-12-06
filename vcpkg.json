@@ -1,0 +1,9 @@
+{
+    "dependencies": [],
+    "features": {
+        "test": {
+            "description": "build tests",
+            "dependencies": [ "gtest" ]
+        }
+    }
+}
