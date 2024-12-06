@@ -8,8 +8,9 @@
 #include <qicon.h>
 #include <qsharedmemory.h>
 #include <qdebug.h>
-#include "Top/config/config.h"
-#include "Top/config/version.h"
+#include "SimpleFileWatcher/FileWatcher.h"
+#include "QHotReload/config/config.h"
+#include "QHotReload/config/version.h"
 
 /*
  *                        _oo0oo_

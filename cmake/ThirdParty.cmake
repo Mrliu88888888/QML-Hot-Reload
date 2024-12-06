@@ -14,3 +14,6 @@ if(QT)
 	message(STATUS "Using Qt version: ${QT_VERSION}")
 	find_package(${QT} COMPONENTS Quick REQUIRED)
 endif()
+
+add_subdirectory(${TOP_THIRDPARTY}/FileWatcher) # export
+												# THIRDPARTY_FILEWATCHER_LIBS
