@@ -11,9 +11,9 @@ project(QHotReload VERSION 1.0.0)
 message(STATUS "${PROJECT_NAME} build tests: ${BUILD_TESTING}")
 
 include(cmake/Common.cmake)
-include(cmake/Pack.cmake)
-include(cmake/PackUtils.cmake)
 include(cmake/ThirdParty.cmake)
+include(cmake/PackUtils.cmake)
+include(cmake/Pack.cmake)
 
 install(FILES "CHANGELOG.md" DESTINATION .)
 install(DIRECTORY ${EXECUTABLE_OUTPUT_PATH}/
