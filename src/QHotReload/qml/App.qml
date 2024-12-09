@@ -1,16 +1,23 @@
 import QtQuick 2.12
-import QtQuick.Window 2.12
+import QtQuick.Controls 2.5
 
-Window {
-    title: "Top"
+ApplicationWindow {
+    x: 0
+    y: 0
+    width: 1
+    height: 1
     visible: true
-    width: 1400
-    height: 800 
+    flags: Qt.WindowStaysOnTopHint
+    title: Qt.application.name + ' ' + Qt.application.version
 
-    Text {
-        anchors.centerIn: parent
-        text: "Hello World"
-        font.pointSize: 20
-        color: "lightgreen"
+    Loader { id: loader }
+
+    Connections {
+        target: fileWatchListener
+        onFileChanged: {
+            const path = "file:///" + filename + "?t=" + Date.now()
+            console.log("[QHotReload]" + path)
+            loader.source = path
+        }
     }
 }
