@@ -4,17 +4,7 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
 
-set(QML_QRC_FILE "${CMAKE_CURRENT_SOURCE_DIR}/qml.qrc")
-set(QML_RCC_FILE "${EXECUTABLE_OUTPUT_PATH}/rcc/qml.rcc")
-file(GLOB_RECURSE QML_FILES "${CMAKE_CURRENT_SOURCE_DIR}/qml/*.qml")
-add_custom_command(
-	OUTPUT ${QML_RCC_FILE}
-	COMMAND rcc --binary ${QML_QRC_FILE} -o ${QML_RCC_FILE}
-	DEPENDS ${QML_QRC_FILE} ${QML_FILES}
-)
-add_custom_target(QML_RCC ALL DEPENDS ${QML_RCC_FILE})
-
-add_executable(${PROJECT_NAME} "main.cpp" "res.qrc")
+add_executable(${PROJECT_NAME} "main.cpp" "qml.qrc" "res.qrc")
 if(WIN32)
 	target_sources(${PROJECT_NAME} PRIVATE "res/Top.rc")
 endif()
@@ -23,9 +13,7 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
 	${QT}::Core ${QT}::Gui ${QT}::Widgets ${QT}::Quick
 	${THIRDPARTY_FILEWATCHER_LIBS}
 )
-add_dependencies(${PROJECT_NAME} QML_RCC)
 
 DEPLOYQT(${PROJECT_NAME} bin)
-install(FILES ${QML_RCC_FILE} DESTINATION bin/rcc)
 install(DIRECTORY ${QT_BIN_PATH}/../qml DESTINATION bin)
 install(TARGETS ${PROJECT_NAME} RUNTIME DESTINATION bin)

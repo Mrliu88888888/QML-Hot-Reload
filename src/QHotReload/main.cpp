@@ -206,11 +206,6 @@ int main(int argc, char* argv[])
         return 2;
     }
 
-    if (!QResource::registerResource("rcc/qml.rcc")) {
-        qDebug() << "registerResource qml.rcc failed";
-        return 3;
-    }
-
     qDebug() << "[Version]";
     qDebug() << "\tQt:" << QT_VERSION_STR;
     qDebug() << "";
