@@ -1,4 +1,4 @@
-project(QHotReload)
+project(QHotReload-${QT_VERSION}-${QT_TOOLCHAIN_NAME})
 
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
