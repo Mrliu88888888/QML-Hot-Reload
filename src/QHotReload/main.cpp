@@ -68,6 +68,7 @@ public:
         qDebug() << "=== Config ===";
         qDebug() << "qmlMainFile:" << qmlMainFile;
         qDebug() << "qmlMainPath:" << qmlMainPath;
+        qDebug() << "";
     }
 
 public:
@@ -125,11 +126,11 @@ int main(int argc, char* argv[])
     app.setWindowIcon(QIcon(":/res/TopUI.png"));
 
     const auto conf = Config::Parse(argc, argv);
-    conf.print();
     if (!conf.isValid()) {
         qDebug() << "usage:" << TOP_NAME << "QmlMainFile";
         return 1;
     }
+    conf.print();
 
     if (!QDir::setCurrent(app.applicationDirPath())) {
         qDebug() << "WorkingDirectory";
