@@ -16,8 +16,8 @@ ApplicationWindow {
         target: fileWatchListener
         onFileChanged: {
             const path = "file:///" + filename + "?t=" + Date.now()
-            console.log("[QHotReload]" + path)
             loader.source = path
+            console.log("[QHotReload] " + path)
         }
     }
 }

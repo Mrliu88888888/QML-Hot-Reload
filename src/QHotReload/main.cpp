@@ -18,7 +18,7 @@ public:
     explicit FileWatchListenerImpl(const QString& qmlMainFile, QObject* parent = nullptr)
         : QObject(parent)
         , FileWatchListener()
-        , qmlMainFile_(QDir::toNativeSeparators(qmlMainFile))
+        , qmlMainFile_(qmlMainFile)
     {
         tmr_.setInterval(500);
         tmr_.setSingleShot(true);
@@ -65,9 +65,9 @@ public:
 
     void print() const
     {
-        qDebug() << "=== Config ===";
-        qDebug() << "qmlMainFile:" << qmlMainFile;
-        qDebug() << "qmlMainPath:" << qmlMainPath;
+        qDebug() << "[Config]";
+        qDebug() << "\tqmlMainFile:" << qmlMainFile;
+        qDebug() << "\tqmlMainPath:" << qmlMainPath;
         qDebug() << "";
     }
 
@@ -76,10 +76,10 @@ public:
     {
         Config conf;
         switch (argc) {
-        case 2: conf.qmlMainFile = argv[1];
+        case 2: conf.qmlMainFile = QDir::toNativeSeparators(argv[1]);
         }
         if (QFileInfo fi(conf.qmlMainFile); fi.exists()) {
-            conf.qmlMainPath = fi.absoluteDir().absolutePath();
+            conf.qmlMainPath = QDir::toNativeSeparators(fi.absoluteDir().absolutePath());
         }
         return conf;
     }
@@ -141,6 +141,10 @@ int main(int argc, char* argv[])
         qDebug() << "registerResource qml.rcc failed";
         return 3;
     }
+
+    qDebug() << "[Version]";
+    qDebug() << "\tQt:" << QT_VERSION_STR;
+    qDebug() << "";
 
     QQmlApplicationEngine engine;
 
