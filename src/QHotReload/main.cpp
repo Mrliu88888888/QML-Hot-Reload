@@ -221,7 +221,15 @@ int main(int argc, char* argv[])
     fileWatcher.addWatch(conf.qmlMainPath.toStdString(), &fileWatchListener, true);
     engine.rootContext()->setContextProperty("fileWatchListener", &fileWatchListener);
 
-    engine.load("qrc:/qml/App.qml");
+#if (QT_VERSION_MAJOR == 6)
+    engine.load("qrc:/qml/App-6.qml");
+#elif (QT_VERSION_MAJOR == 5)
+#    if (QT_VERSION_MINOR == 12)
+    engine.load("qrc:/qml/App-5.12.qml");
+#    elif (QT_VERSION_MINOR == 15)
+    engine.load("qrc:/qml/App-5.15.qml");
+#    endif
+#endif
     if (engine.rootObjects().isEmpty()) {
         qDebug() << "QQmlApplicationEngine rootObjects isEmpty";
         return -1;

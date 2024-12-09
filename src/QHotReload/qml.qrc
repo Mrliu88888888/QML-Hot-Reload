@@ -1,5 +1,7 @@
 <RCC>
     <qresource prefix="/">
-        <file>qml/App.qml</file>
+        <file>qml/App-5.12.qml</file>
+        <file>qml/App-5.15.qml</file>
+        <file>qml/App-6.qml</file>
     </qresource>
 </RCC>
