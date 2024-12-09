@@ -1,4 +1,9 @@
-#include <qguiapplication.h>
+#include <qapplication.h>
+#include <qdialog.h>
+#include <qevent.h>
+#include <qmimedata.h>
+#include <qlabel.h>
+#include <qlayout.h>
 #include <qqmlapplicationengine.h>
 #include <qqmlcontext.h>
 #include <qdir.h>
@@ -45,6 +50,61 @@ private:
     QTimer        tmr_;
     const QString qmlMainFile_;
 };
+
+class Win final : public QDialog
+{
+public:
+    explicit Win(QWidget* parent = nullptr)
+        : QDialog(parent)
+    {
+        setAcceptDrops(true);
+
+        auto lab = new QLabel("请拖拽QML主文件至此窗口", this);
+
+        auto layout = new QVBoxLayout(this);
+        {
+            layout->addWidget(lab);
+        }
+
+        setLayout(layout);
+
+        resize(500, 500);
+    }
+
+    auto qmlMainFile() const { return qmlMainFile_; }
+
+protected:
+    virtual void dragEnterEvent(QDragEnterEvent* event) override
+    {
+        if (!event->mimeData()->hasUrls()) {
+            event->ignore();
+            return;
+        }
+
+        if (event->mimeData()->urls().size() != 1) {
+            event->ignore();
+            return;
+        }
+        for (const auto& url : event->mimeData()->urls()) {
+            const auto filename = url.toLocalFile();
+            if (QFileInfo(filename).suffix().toLower() == "qml") {
+                qmlMainFile_ = filename;
+                event->accept();
+                return;
+            }
+        }
+        event->ignore();
+    }
+    virtual void dropEvent(QDropEvent* event) override
+    {
+        if (!qmlMainFile().isEmpty()) {
+            QDialog::accept();
+        }
+    }
+
+private:
+    QString qmlMainFile_;
+};
 #include "main.moc"
 
 struct Config
@@ -75,9 +135,18 @@ public:
     static Config Parse(int argc, char* argv[])
     {
         Config conf;
-        switch (argc) {
-        case 2: conf.qmlMainFile = QDir::toNativeSeparators(argv[1]);
+        if (argc == 1) {
+            Win w;
+            if (w.exec() == QDialog::Accepted) {
+                conf.qmlMainFile = w.qmlMainFile();
+            }
         }
+        else {
+            switch (argc) {
+            case 2: conf.qmlMainFile = argv[1];
+            }
+        }
+        conf.qmlMainFile = QDir::toNativeSeparators(conf.qmlMainFile);
         if (QFileInfo fi(conf.qmlMainFile); fi.exists()) {
             conf.qmlMainPath = QDir::toNativeSeparators(fi.absoluteDir().absolutePath());
         }
@@ -116,7 +185,7 @@ int main(int argc, char* argv[])
 
     QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
 
-    QGuiApplication app(argc, argv);
+    QApplication app(argc, argv);
 
     QTextCodec::setCodecForLocale(QTextCodec::codecForName("UTF-8"));
 

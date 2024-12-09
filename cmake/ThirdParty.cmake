@@ -12,7 +12,7 @@ else()
 endif()
 if(QT)
 	message(STATUS "Using Qt version: ${QT_VERSION}")
-	find_package(${QT} COMPONENTS Quick REQUIRED)
+	find_package(${QT} COMPONENTS Core Gui Widgets Quick REQUIRED)
 endif()
 
 add_subdirectory(${TOP_THIRDPARTY}/FileWatcher) # export

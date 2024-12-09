@@ -19,7 +19,10 @@ if(WIN32)
 	target_sources(${PROJECT_NAME} PRIVATE "res/Top.rc")
 endif()
 target_include_directories(${PROJECT_NAME} PRIVATE ${TOP_BINARY_INCLUDE})
-target_link_libraries(${PROJECT_NAME} PRIVATE ${QT}::Quick ${THIRDPARTY_FILEWATCHER_LIBS})
+target_link_libraries(${PROJECT_NAME} PRIVATE
+	${QT}::Core ${QT}::Gui ${QT}::Widgets ${QT}::Quick
+	${THIRDPARTY_FILEWATCHER_LIBS}
+)
 add_dependencies(${PROJECT_NAME} QML_RCC)
 
 DEPLOYQT(${PROJECT_NAME} bin)
