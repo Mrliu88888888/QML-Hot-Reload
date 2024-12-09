@@ -7,7 +7,9 @@
 #include <qqmlapplicationengine.h>
 #include <qqmlcontext.h>
 #include <qdir.h>
-#include <qtextcodec.h>
+#if (QT_VERSION_MAJOR == 5)
+#    include <qtextcodec.h>
+#endif
 #include <qresource.h>
 #include <qicon.h>
 #include <qtimer.h>
@@ -187,7 +189,9 @@ int main(int argc, char* argv[])
 
     QApplication app(argc, argv);
 
+#if (QT_VERSION_MAJOR == 5)
     QTextCodec::setCodecForLocale(QTextCodec::codecForName("UTF-8"));
+#endif
 
     app.setOrganizationName("白日做Meng技术无限公司");
     app.setApplicationName(TOP_NAME "UI");
