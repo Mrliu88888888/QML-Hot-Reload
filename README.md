@@ -2,7 +2,8 @@
 实时预览和更新 QML 界面，高效开发和即时调试。
 
 # 常见问题
-- 如何选择下载 Release 文件
+- 不同使用场景下该如何选择下载？
+[下载链接](https://github.com/Mrliu88888888/QML-Hot-Reload/releases/tag/v1.0.0)
 ```txt
 1. QHotReload-${QT版本}.exe
    如果您已经安装了 Qt 开发环境，只需下载与您 Qt 版本匹配的文件，并将其拷贝到 Qt 的 bin 目录下即可使用。
