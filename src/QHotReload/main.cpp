@@ -31,8 +31,9 @@ public:
         tmr_.setSingleShot(true);
         QObject::connect(
             &tmr_, &QTimer::timeout, this, [this]() { emit fileChanged(qmlMainFile_); });
-        tmr_.start();
     }
+
+    void notifyFileChanged() { emit fileChanged(qmlMainFile_); }
 
 signals:
     void fileChanged(const QString& filename);
@@ -224,6 +225,10 @@ int main(int argc, char* argv[])
     fileWatcher.addWatch(conf.qmlMainPath.toStdString(), &fileWatchListener, true);
     engine.rootContext()->setContextProperty("fileWatchListener", &fileWatchListener);
 
+    QObject::connect(&fileWatchListener, &FileWatchListenerImpl::fileChanged, [&engine]() {
+        engine.clearComponentCache();
+    });
+
     const auto kAppFile = QUrl(
 #if (QT_VERSION_MAJOR == 5)
 #    if (QT_VERSION_MINOR == 6)
@@ -242,6 +247,7 @@ int main(int argc, char* argv[])
         qDebug() << "QQmlApplicationEngine rootObjects isEmpty";
         return -1;
     }
+    fileWatchListener.notifyFileChanged();
 
     return app.exec();
 }
