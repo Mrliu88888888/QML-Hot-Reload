@@ -89,7 +89,7 @@ protected:
         }
         for (const auto& url : event->mimeData()->urls()) {
             const auto filename = url.toLocalFile();
-            if (QFileInfo(filename).suffix().toLower() == "qml") {
+            if (QFileInfo(filename).suffix().compare("qml", Qt::CaseInsensitive) == 0) {
                 qmlMainFile_ = filename;
                 event->accept();
                 return;
@@ -185,7 +185,9 @@ int main(int argc, char* argv[])
 {
     qputenv("QT_OPENGL", "angle");
 
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
     QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
+#endif
 
     QApplication app(argc, argv);
 
@@ -221,15 +223,20 @@ int main(int argc, char* argv[])
     fileWatcher.addWatch(conf.qmlMainPath.toStdString(), &fileWatchListener, true);
     engine.rootContext()->setContextProperty("fileWatchListener", &fileWatchListener);
 
-#if (QT_VERSION_MAJOR == 6)
-    engine.load("qrc:/qml/App-6.qml");
-#elif (QT_VERSION_MAJOR == 5)
-#    if (QT_VERSION_MINOR == 12)
-    engine.load("qrc:/qml/App-5.12.qml");
+    const auto kAppFile = QUrl(
+#if (QT_VERSION_MAJOR == 5)
+#    if (QT_VERSION_MINOR == 6)
+        "qrc:/qml/App-5.6.qml"
+#    elif (QT_VERSION_MINOR == 12)
+        "qrc:/qml/App-5.12.qml"
 #    elif (QT_VERSION_MINOR == 15)
-    engine.load("qrc:/qml/App-5.15.qml");
+        "qrc:/qml/App-5.15.qml"
 #    endif
+#elif (QT_VERSION_MAJOR == 6)
+        "qrc:/qml/App-6.qml"
 #endif
+    );
+    engine.load(kAppFile);
     if (engine.rootObjects().isEmpty()) {
         qDebug() << "QQmlApplicationEngine rootObjects isEmpty";
         return -1;

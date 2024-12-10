@@ -85,6 +85,31 @@
         },
 
         {
+            "name": "Qt5.6.3-msvc2013",
+            "description": "面向具有 Visual Studio 开发环境的 Windows。",
+            "generator": "Ninja",
+            "binaryDir": "${sourceDir}/out/build/${presetName}",
+            "installDir": "${sourceDir}/out/install/${presetName}",
+            "cacheVariables": {
+                "CMAKE_C_COMPILER": "cl.exe",
+                "CMAKE_CXX_COMPILER": "cl.exe",
+                "CMAKE_TOOLCHAIN_FILE": "D:/App/vcpkg/scripts/buildsystems/vcpkg.cmake",
+                "CMAKE_BUILD_TYPE": "Release"
+            },
+            "condition": {
+                "type": "equals",
+                "lhs": "${hostSystemName}",
+                "rhs": "Windows"
+            },
+            "architecture": {
+                "value": "x86",
+                "strategy": "external"
+            },
+            "environment": {
+                "PATH": "C:/Qt/Qt5.6.3/5.6.3/msvc2013/bin;$penv{PATH}"
+            }
+        },
+        {
             "name": "Qt5.12.5-msvc2015_64",
             "description": "面向具有 Visual Studio 开发环境的 Windows。",
             "generator": "Ninja",

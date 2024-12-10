@@ -1,5 +1,6 @@
 <RCC>
     <qresource prefix="/">
+        <file>qml/App-5.6.qml</file>
         <file>qml/App-5.12.qml</file>
         <file>qml/App-5.15.qml</file>
         <file>qml/App-6.qml</file>
