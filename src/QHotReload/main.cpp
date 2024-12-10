@@ -148,10 +148,11 @@ public:
             case 2: conf.qmlMainFile = argv[1];
             }
         }
-        conf.qmlMainFile = QDir::toNativeSeparators(conf.qmlMainFile);
         if (QFileInfo fi(conf.qmlMainFile); fi.exists()) {
-            conf.qmlMainPath = QDir::toNativeSeparators(fi.absoluteDir().absolutePath());
+            conf.qmlMainPath = fi.absoluteDir().absolutePath();
         }
+        conf.qmlMainFile.replace("\\", "/");
+        conf.qmlMainPath.replace("\\", "/");
         return conf;
     }
 };
@@ -196,9 +197,9 @@ int main(int argc, char* argv[])
 #endif
 
     app.setOrganizationName("白日做Meng技术无限公司");
-    app.setApplicationName(TOP_NAME "UI");
+    app.setApplicationName(TOP_NAME);
     app.setApplicationVersion(TOP_VERSION);
-    app.setWindowIcon(QIcon(":/res/TopUI.png"));
+    app.setWindowIcon(QIcon(":/res/Top.png"));
 
     const auto conf = Config::Parse(argc, argv);
     if (!conf.isValid()) {
@@ -207,7 +208,7 @@ int main(int argc, char* argv[])
     }
     conf.print();
 
-    if (!QDir::setCurrent(app.applicationDirPath())) {
+    if (!QDir::setCurrent(conf.qmlMainPath)) {
         qDebug() << "WorkingDirectory";
         return 2;
     }
