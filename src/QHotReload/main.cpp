@@ -118,6 +118,7 @@ public:
     }
 
     auto qmlMainFile() const { return qmlMainFile_; }
+    auto qmlMainPath() const { return qmlMainPath_; }
 
 protected:
     virtual void dragEnterEvent(QDragEnterEvent* event) override
@@ -126,15 +127,22 @@ protected:
             event->ignore();
             return;
         }
-
         if (event->mimeData()->urls().size() != 1) {
             event->ignore();
             return;
         }
         for (const auto& url : event->mimeData()->urls()) {
-            const auto filename = url.toLocalFile();
-            if (QFileInfo(filename).suffix().compare("qml", Qt::CaseInsensitive) == 0) {
-                qmlMainFile_ = filename;
+            const auto localFile = url.toLocalFile();
+            const auto fileinfo  = QFileInfo(localFile);
+            if (fileinfo.isFile()) {
+                if (fileinfo.suffix().compare("qml", Qt::CaseInsensitive) == 0) {
+                    qmlMainFile_ = localFile;
+                    event->accept();
+                    return;
+                }
+            }
+            else if (fileinfo.isDir()) {
+                qmlMainPath_ = localFile;
                 event->accept();
                 return;
             }
@@ -150,6 +158,7 @@ protected:
 
 private:
     QString qmlMainFile_;
+    QString qmlMainPath_;
 };
 #include "main.moc"
 
@@ -185,15 +194,19 @@ public:
             ConfigDialog dlg;
             if (dlg.exec() == QDialog::Accepted) {
                 conf.qmlMainFile = dlg.qmlMainFile();
+                conf.qmlMainPath = dlg.qmlMainPath();
             }
         }
         else {
             switch (argc) {
+            case 3: conf.qmlMainPath = argv[2]; [[fallthrough]];
             case 2: conf.qmlMainFile = argv[1];
             }
         }
-        if (QFileInfo fi(conf.qmlMainFile); fi.exists()) {
-            conf.qmlMainPath = fi.absoluteDir().absolutePath();
+        if (conf.qmlMainPath.isEmpty()) {
+            if (QFileInfo fi(conf.qmlMainFile); fi.exists()) {
+                conf.qmlMainPath = fi.absoluteDir().absolutePath();
+            }
         }
         conf.qmlMainFile.replace("\\", "/");
         conf.qmlMainPath.replace("\\", "/");
