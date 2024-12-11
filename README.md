@@ -1,6 +1,17 @@
 # QML Hot Reload
 实时预览和更新 QML 界面，高效开发和即时调试。
 
+# 编译
+## 自动化脚本
+```cmd
+:: cmd
+.\script\01_build.bat && .\script\02_pack.bat && .\script\03_md5.bat && cd .\out\build\bin\
+```
+```powershell
+# powershell
+.\script\01_build.bat; .\script\02_pack.bat; .\script\03_md5.bat; cd .\out\build\bin\
+```
+
 # 常见问题
 - 不同使用场景下该如何选择下载？
 [下载链接](https://github.com/Mrliu88888888/QML-Hot-Reload/releases/tag/v1.1.0)
