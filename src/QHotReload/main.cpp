@@ -65,13 +65,11 @@ public:
         auto lab = new QLabel("请拖拽QML主文件至此窗口", this);
 
         auto layout = new QVBoxLayout(this);
-        {
-            layout->addWidget(lab);
-        }
-
+        layout->addWidget(lab);
         setLayout(layout);
 
         resize(500, 500);
+        setWindowTitle(qApp->applicationName() + ' ' + qApp->applicationVersion());
     }
 
     auto qmlMainFile() const { return qmlMainFile_; }
@@ -204,7 +202,12 @@ int main(int argc, char* argv[])
 
     const auto conf = Config::Parse(argc, argv);
     if (!conf.isValid()) {
-        qDebug() << "usage:" << TOP_NAME << "QmlMainFile";
+        qDebug() << "usage:"
+                 << TOP_NAME
+#ifdef _WIN32
+            ".exe"
+#endif
+                 << "QmlMainFile";
         return 1;
     }
     conf.print();
@@ -215,6 +218,11 @@ int main(int argc, char* argv[])
     }
 
     qDebug() << "[Version]";
+    qDebug() << QString("\t%1: %2")
+                    .arg(app.applicationName())
+                    .arg(app.applicationVersion())
+                    .toUtf8()
+                    .data();
     qDebug() << "\tQt:" << QT_VERSION_STR;
     qDebug() << "";
 
