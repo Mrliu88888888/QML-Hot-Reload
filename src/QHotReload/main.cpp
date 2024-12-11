@@ -24,7 +24,7 @@ class FileWatchListenerImpl final : public QObject, public FW::FileWatchListener
 {
     Q_OBJECT
 public:
-    explicit FileWatchListenerImpl(const QString& qmlMainPath, const QString& qmlMainFile,
+    explicit FileWatchListenerImpl(const QString& qmlRootPath, const QString& qmlMainFile,
                                    QObject* parent = nullptr)
         : QObject(parent)
         , FileWatchListener()
@@ -36,7 +36,7 @@ public:
             &tmr_, &QTimer::timeout, this, &FileWatchListenerImpl::onNotifyFileChanged);
 
         QDirIterator it(
-            qmlMainPath, QStringList() << "*.qrc", QDir::Files, QDirIterator::Subdirectories);
+            qmlRootPath, QStringList() << "*.qrc", QDir::Files, QDirIterator::Subdirectories);
         while (it.hasNext()) {
             qrcFiles_.append(it.next());
         }
@@ -118,7 +118,7 @@ public:
     }
 
     auto qmlMainFile() const { return qmlMainFile_; }
-    auto qmlMainPath() const { return qmlMainPath_; }
+    auto qmlRootPath() const { return qmlRootPath_; }
 
 protected:
     virtual void dragEnterEvent(QDragEnterEvent* event) override
@@ -142,7 +142,7 @@ protected:
                 }
             }
             else if (fileinfo.isDir()) {
-                qmlMainPath_ = localFile;
+                qmlRootPath_ = localFile;
                 event->accept();
                 return;
             }
@@ -158,7 +158,7 @@ protected:
 
 private:
     QString qmlMainFile_;
-    QString qmlMainPath_;
+    QString qmlRootPath_;
 };
 #include "main.moc"
 
@@ -168,11 +168,14 @@ public:
     explicit Config() {}
 
     QString qmlMainFile;
-    QString qmlMainPath;
+    QString qmlRootPath;
 
     bool isValid() const
     {
-        if (qmlMainFile.isEmpty() || qmlMainPath.isEmpty()) {
+        if (qmlMainFile.isEmpty() || qmlRootPath.isEmpty()) {
+            return false;
+        }
+        if (!qmlMainFile.startsWith(qmlRootPath)) {
             return false;
         }
         return true;
@@ -182,7 +185,7 @@ public:
     {
         qDebug() << "[Config]";
         qDebug() << "\tqmlMainFile:" << qmlMainFile;
-        qDebug() << "\tqmlMainPath:" << qmlMainPath;
+        qDebug() << "\tqmlRootPath:" << qmlRootPath;
         qDebug() << "";
     }
 
@@ -194,22 +197,22 @@ public:
             ConfigDialog dlg;
             if (dlg.exec() == QDialog::Accepted) {
                 conf.qmlMainFile = dlg.qmlMainFile();
-                conf.qmlMainPath = dlg.qmlMainPath();
+                conf.qmlRootPath = dlg.qmlRootPath();
             }
         }
         else {
             switch (argc) {
-            case 3: conf.qmlMainPath = argv[2]; [[fallthrough]];
+            case 3: conf.qmlRootPath = argv[2]; [[fallthrough]];
             case 2: conf.qmlMainFile = argv[1];
             }
         }
-        if (conf.qmlMainPath.isEmpty()) {
+        if (conf.qmlRootPath.isEmpty()) {
             if (QFileInfo fi(conf.qmlMainFile); fi.exists()) {
-                conf.qmlMainPath = fi.absoluteDir().absolutePath();
+                conf.qmlRootPath = fi.absoluteDir().absolutePath();
             }
         }
         conf.qmlMainFile.replace("\\", "/");
-        conf.qmlMainPath.replace("\\", "/");
+        conf.qmlRootPath.replace("\\", "/");
         return conf;
     }
 };
@@ -265,12 +268,13 @@ int main(int argc, char* argv[])
 #ifdef _WIN32
             ".exe"
 #endif
-                 << "QmlMainFile";
+                 << "QmlMainFile"
+                 << "QmlRootPath";
         return 1;
     }
     conf.print();
 
-    if (!QDir::setCurrent(conf.qmlMainPath)) {
+    if (!QDir::setCurrent(conf.qmlRootPath)) {
         qDebug() << "WorkingDirectory";
         return 2;
     }
@@ -287,8 +291,8 @@ int main(int argc, char* argv[])
     QQmlApplicationEngine engine;
 
     FW::FileWatcher       fileWatcher;
-    FileWatchListenerImpl fileWatchListener(conf.qmlMainPath, conf.qmlMainFile);
-    fileWatcher.addWatch(conf.qmlMainPath.toStdString(), &fileWatchListener, true);
+    FileWatchListenerImpl fileWatchListener(conf.qmlRootPath, conf.qmlMainFile);
+    fileWatcher.addWatch(conf.qmlRootPath.toStdString(), &fileWatchListener, true);
     engine.rootContext()->setContextProperty("fileWatchListener", &fileWatchListener);
 
     QObject::connect(&fileWatchListener, &FileWatchListenerImpl::fileChanged, [&engine]() {
