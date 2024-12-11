@@ -6,7 +6,7 @@ if(BUILD_TESTING)
 	list(APPEND VCPKG_MANIFEST_FEATURES "test")
 endif()
 
-project(QHotReload VERSION 1.0.0)
+project(QHotReload VERSION 1.1.0)
 
 message(STATUS "${PROJECT_NAME} build tests: ${BUILD_TESTING}")
 
