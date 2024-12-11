@@ -19,5 +19,16 @@ install(DIRECTORY ${QT_BIN_PATH}/../qml DESTINATION bin
 	FILES_MATCHING
 	PATTERN "*"
 	PATTERN "*.pdb" EXCLUDE
+	PATTERN "*.dll" EXCLUDE
 )
+file(GLOB_RECURSE QML_DLL_FILES ${QT_BIN_PATH}/../qml/*.dll)
+foreach(dll_file ${QML_DLL_FILES})
+	string(REPLACE ".dll" "d.dll" tmp_file ${dll_file})
+	if(NOT EXISTS ${tmp_file})
+		continue()
+	endif()
+	get_filename_component(dll_dir ${dll_file} PATH)
+	file(RELATIVE_PATH dll_relative_dir ${QT_BIN_PATH}/.. ${dll_dir})
+	install(FILES ${dll_file} DESTINATION bin/${dll_relative_dir})
+endforeach()
 install(TARGETS ${PROJECT_NAME} RUNTIME DESTINATION bin)
