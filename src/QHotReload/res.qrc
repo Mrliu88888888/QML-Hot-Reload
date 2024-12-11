@@ -1,5 +1,5 @@
 <RCC>
-    <qresource prefix="/">
+    <qresource prefix="/QHotReload">
         <file>res/Top.png</file>
     </qresource>
 </RCC>

@@ -198,7 +198,7 @@ int main(int argc, char* argv[])
     app.setOrganizationName("白日做Meng技术无限公司");
     app.setApplicationName(TOP_NAME);
     app.setApplicationVersion(TOP_VERSION);
-    app.setWindowIcon(QIcon(":/res/Top.png"));
+    app.setWindowIcon(QIcon("qrc:/QHotReload/res/Top.png"));
 
     const auto conf = Config::Parse(argc, argv);
     if (!conf.isValid()) {
@@ -240,14 +240,14 @@ int main(int argc, char* argv[])
     const auto kAppFile = QUrl(
 #if (QT_VERSION_MAJOR == 5)
 #    if (QT_VERSION_MINOR == 6)
-        "qrc:/qml/App-5.6.qml"
+        "qrc:/QHotReload/qml/App-5.6.qml"
 #    elif (QT_VERSION_MINOR == 12)
-        "qrc:/qml/App-5.12.qml"
+        "qrc:/QHotReload/qml/App-5.12.qml"
 #    elif (QT_VERSION_MINOR == 15)
-        "qrc:/qml/App-5.15.qml"
+        "qrc:/QHotReload/qml/App-5.15.qml"
 #    endif
 #elif (QT_VERSION_MAJOR == 6)
-        "qrc:/qml/App-6.qml"
+        "qrc:/QHotReload/qml/App-6.qml"
 #endif
     );
     engine.load(kAppFile);
