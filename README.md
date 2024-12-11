@@ -3,7 +3,7 @@
 
 # 常见问题
 - 不同使用场景下该如何选择下载？
-[下载链接](https://github.com/Mrliu88888888/QML-Hot-Reload/releases/tag/v1.0.0)
+[下载链接](https://github.com/Mrliu88888888/QML-Hot-Reload/releases/tag/v1.1.0)
 ```txt
 1. QHotReload-QT版本.exe
    如果你已经安装了Qt开发环境，只需下载与你Qt版本匹配的可执行文件，并将其拷贝到Qt的bin目录下即可使用。
