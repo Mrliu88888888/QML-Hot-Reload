@@ -3,7 +3,10 @@
 #include <qevent.h>
 #include <qmimedata.h>
 #include <qlabel.h>
+#include <qlineedit.h>
+#include <qpushbutton.h>
 #include <qlayout.h>
+#include <qmessagebox.h>
 #include <qqmlapplicationengine.h>
 #include <qqmlcontext.h>
 #include <qdir.h>
@@ -107,18 +110,44 @@ public:
     {
         setAcceptDrops(true);
 
-        auto lab = new QLabel("请拖拽QML主文件至此窗口", this);
+        leQmlMainFile = new QLineEdit(this);
+        leQmlRootPath = new QLineEdit(this);
+        auto lab      = new QLabel("可拖拽至此窗口完成配置项", this);
+        auto btn      = new QPushButton("确定", this);
+
+        leQmlMainFile->setPlaceholderText("请配置QML主文件");
+        leQmlRootPath->setPlaceholderText("请配置QML顶层目录");
+        QObject::connect(btn, &QPushButton::clicked, this, [this]() {
+            if (leQmlMainFile->text().isEmpty()) {
+                QMessageBox::information(this, "配置", "请至少配置QML主文件");
+                return;
+            }
+            if (!QFileInfo(leQmlMainFile->text()).exists()) {
+                QMessageBox::information(this, "配置", "QML主文件不存在");
+                return;
+            }
+            if (!leQmlRootPath->text().isEmpty()) {
+                if (QFileInfo(leQmlRootPath->text()).isDir()) {
+                    QMessageBox::information(this, "配置", "QML顶层目录不存在");
+                    return;
+                }
+            }
+            QDialog::accept();
+        });
 
         auto layout = new QVBoxLayout(this);
+        layout->addWidget(leQmlMainFile);
+        layout->addWidget(leQmlRootPath);
         layout->addWidget(lab);
+        layout->addWidget(btn);
         setLayout(layout);
 
-        resize(500, 500);
+        resize(500, 300);
         setWindowTitle(qApp->applicationName() + ' ' + qApp->applicationVersion());
     }
 
-    auto qmlMainFile() const { return qmlMainFile_; }
-    auto qmlRootPath() const { return qmlRootPath_; }
+    auto qmlMainFile() const { return leQmlMainFile->text(); }
+    auto qmlRootPath() const { return leQmlRootPath->text(); }
 
 protected:
     virtual void dragEnterEvent(QDragEnterEvent* event) override
@@ -131,34 +160,32 @@ protected:
             event->ignore();
             return;
         }
+        event->accept();
+    }
+    virtual void dropEvent(QDropEvent* event) override
+    {
         for (const auto& url : event->mimeData()->urls()) {
             const auto localFile = url.toLocalFile();
             const auto fileinfo  = QFileInfo(localFile);
             if (fileinfo.isFile()) {
                 if (fileinfo.suffix().compare("qml", Qt::CaseInsensitive) == 0) {
-                    qmlMainFile_ = localFile;
+                    leQmlMainFile->setText(localFile);
                     event->accept();
                     return;
                 }
             }
             else if (fileinfo.isDir()) {
-                qmlRootPath_ = localFile;
+                leQmlRootPath->setText(localFile);
                 event->accept();
                 return;
             }
         }
         event->ignore();
     }
-    virtual void dropEvent(QDropEvent* event) override
-    {
-        if (!qmlMainFile().isEmpty()) {
-            QDialog::accept();
-        }
-    }
 
 private:
-    QString qmlMainFile_;
-    QString qmlRootPath_;
+    QLineEdit* leQmlMainFile;
+    QLineEdit* leQmlRootPath;
 };
 #include "main.moc"
 
