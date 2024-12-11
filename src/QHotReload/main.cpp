@@ -300,8 +300,8 @@ int main(int argc, char* argv[])
     qDebug() << QString("\t%1: %2")
                     .arg(app.applicationName())
                     .arg(app.applicationVersion())
-                    .toUtf8()
-                    .data();
+                    .toStdString()
+                    .c_str();
     qDebug() << "\tQt:" << QT_VERSION_STR;
     qDebug() << "";
 
