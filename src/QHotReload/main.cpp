@@ -7,12 +7,14 @@
 #include <qqmlapplicationengine.h>
 #include <qqmlcontext.h>
 #include <qdir.h>
+#include <qdiriterator.h>
 #if (QT_VERSION_MAJOR == 5)
 #    include <qtextcodec.h>
 #endif
 #include <qresource.h>
 #include <qicon.h>
 #include <qtimer.h>
+#include <qprocess.h>
 #include <qdebug.h>
 #include "SimpleFileWatcher/FileWatcher.h"
 #include "QHotReload/config/config.h"
@@ -22,7 +24,8 @@ class FileWatchListenerImpl final : public QObject, public FW::FileWatchListener
 {
     Q_OBJECT
 public:
-    explicit FileWatchListenerImpl(const QString& qmlMainFile, QObject* parent = nullptr)
+    explicit FileWatchListenerImpl(const QString& qmlMainPath, const QString& qmlMainFile,
+                                   QObject* parent = nullptr)
         : QObject(parent)
         , FileWatchListener()
         , qmlMainFile_(qmlMainFile)
@@ -30,34 +33,76 @@ public:
         tmr_.setInterval(500);
         tmr_.setSingleShot(true);
         QObject::connect(
-            &tmr_, &QTimer::timeout, this, [this]() { emit fileChanged(qmlMainFile_); });
-    }
+            &tmr_, &QTimer::timeout, this, &FileWatchListenerImpl::onNotifyFileChanged);
 
-    void notifyFileChanged() { emit fileChanged(qmlMainFile_); }
+        QDirIterator it(
+            qmlMainPath, QStringList() << "*.qrc", QDir::Files, QDirIterator::Subdirectories);
+        while (it.hasNext()) {
+            qrcFiles_.append(it.next());
+        }
+    }
 
 signals:
     void fileChanged(const QString& filename);
+
+public slots:
+    void onNotifyFileChanged()
+    {
+        qrcFiles_.removeDuplicates();
+        for (const auto& qrc : qrcFiles_) {
+            onReloadRcc(qrc);
+        }
+        qrcFiles_.clear();
+        emit fileChanged(qmlMainFile_);
+    }
 
 private:
     virtual void handleFileAction(FW::WatchID watchid, const FW::String& dir,
                                   const FW::String& filename, FW::Action action) override
     {
         Q_UNUSED(watchid);
-        Q_UNUSED(dir);
-        Q_UNUSED(filename);
         Q_UNUSED(action);
 
+        if (QFileInfo(filename.c_str()).suffix().compare("qrc", Qt::CaseInsensitive) == 0) {
+            qrcFiles_.append(QString("%1/%2").arg(dir.c_str()).arg(filename.c_str()));
+        }
         tmr_.start();
     }
 
+    void onReloadRcc(const QString& qrcName)
+    {
+        const auto rccPath = QString("%1/%2").arg(QDir::tempPath()).arg(qApp->applicationName());
+        const auto rccName = QString("%1.rcc").arg(QFileInfo(qrcName).baseName());
+        const auto cmd = QString("rcc -binary %1 -o %2/%3").arg(qrcName).arg(rccPath).arg(rccName);
+        if (QDir dir(rccPath); !dir.exists()) {
+            if (!dir.mkpath(rccPath)) {
+                qDebug() << "onReloadRcc mkpath(" << rccPath << ") failed...";
+                return;
+            }
+        }
+
+        const auto rccFilename = QString("%1/%2").arg(rccPath).arg(rccName);
+        QResource::unregisterResource(rccFilename);
+        const auto code = QProcess::execute(cmd);
+        if (code == 0) {
+            if (!QResource::registerResource(rccFilename)) {
+                qDebug() << "onReloadRcc registerResource(" << rccFilename << ") failed...";
+            }
+        }
+        else {
+            qDebug() << "onReloadRcc execute(" << cmd << ") code:" << code;
+        }
+    }
+
     QTimer        tmr_;
+    QStringList   qrcFiles_;
     const QString qmlMainFile_;
 };
 
-class Win final : public QDialog
+class ConfigDialog final : public QDialog
 {
 public:
-    explicit Win(QWidget* parent = nullptr)
+    explicit ConfigDialog(QWidget* parent = nullptr)
         : QDialog(parent)
     {
         setAcceptDrops(true);
@@ -137,9 +182,9 @@ public:
     {
         Config conf;
         if (argc == 1) {
-            Win w;
-            if (w.exec() == QDialog::Accepted) {
-                conf.qmlMainFile = w.qmlMainFile();
+            ConfigDialog dlg;
+            if (dlg.exec() == QDialog::Accepted) {
+                conf.qmlMainFile = dlg.qmlMainFile();
             }
         }
         else {
@@ -229,7 +274,7 @@ int main(int argc, char* argv[])
     QQmlApplicationEngine engine;
 
     FW::FileWatcher       fileWatcher;
-    FileWatchListenerImpl fileWatchListener(conf.qmlMainFile);
+    FileWatchListenerImpl fileWatchListener(conf.qmlMainPath, conf.qmlMainFile);
     fileWatcher.addWatch(conf.qmlMainPath.toStdString(), &fileWatchListener, true);
     engine.rootContext()->setContextProperty("fileWatchListener", &fileWatchListener);
 
@@ -255,7 +300,7 @@ int main(int argc, char* argv[])
         qDebug() << "QQmlApplicationEngine rootObjects isEmpty";
         return -1;
     }
-    fileWatchListener.notifyFileChanged();
+    fileWatchListener.onNotifyFileChanged();
 
     return app.exec();
 }
