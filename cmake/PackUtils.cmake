@@ -6,6 +6,7 @@ if(WIN32)
 			"
 			message(\"[DEPLOYQT] ${TARGET_NAME}\")
 			execute_process(COMMAND ${WINDEPLOYQT}
+				--qmldir ${QT_BIN_PATH}/../qml
 				--dir ../deploy/${TARGET_NAME}
 				${TARGET_NAME}.exe
 				WORKING_DIRECTORY ${EXECUTABLE_OUTPUT_PATH}
@@ -56,6 +57,7 @@ elseif(UNIX)
 			execute_process(COMMAND ${LINUXDEPLOYQT}
 				${TARGET_NAME}
 				-qmake=${QT_BIN_PATH}/qmake
+				-qmldir=${QT_BIN_PATH}/../qml
 				WORKING_DIRECTORY ${EXECUTABLE_OUTPUT_PATH}/../deploy/${TARGET_NAME}
 				OUTPUT_FILE ../deploy/${TARGET_NAME}.out.log
 				ERROR_FILE ../deploy/${TARGET_NAME}.err.log
