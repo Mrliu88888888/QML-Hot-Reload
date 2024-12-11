@@ -122,16 +122,6 @@ public:
                 QMessageBox::information(this, "配置", "请至少配置QML主文件");
                 return;
             }
-            if (!QFileInfo(leQmlMainFile->text()).exists()) {
-                QMessageBox::information(this, "配置", "QML主文件不存在");
-                return;
-            }
-            if (!leQmlRootPath->text().isEmpty()) {
-                if (QFileInfo(leQmlRootPath->text()).isDir()) {
-                    QMessageBox::information(this, "配置", "QML顶层目录不存在");
-                    return;
-                }
-            }
             QDialog::accept();
         });
 
